@@ -6,8 +6,8 @@ import { z } from "zod";
 import { Decimal } from "@prisma/client/runtime/library";
 
 const GastoSchema = z.object({
-    tipo: z.string(),
-    valor: z.coerce.number().min(0),
+    tipo: z.string().min(1, "Selecione o tipo"),
+    valor: z.coerce.number().min(0.01, "Valor inválido"),
     descricao: z.string().optional(),
 });
 
@@ -20,16 +20,43 @@ const DividaSchema = z.object({
     taxaMediaMercado: z.coerce.number().min(0).optional(),
 });
 
+// Helper for currency parsing
+function parseCurrency(value: FormDataEntryValue | null): number | undefined {
+    if (!value || typeof value !== 'string') return undefined;
+
+    // Remove currency symbols and whitespace
+    let clean = value.replace(/[R$\s]/g, '');
+
+    // Check if it uses comma as decimal separator (e.g. 1.200,50 or 1200,50)
+    if (clean.includes(',')) {
+        // Remove thousands separators (dots) if present
+        if (clean.includes('.')) {
+            clean = clean.replace(/\./g, '');
+        }
+        // Replace decimal separator
+        clean = clean.replace(',', '.');
+    }
+
+    const num = parseFloat(clean);
+    return isNaN(num) ? undefined : num;
+}
+
 // --- Expenses Actions ---
 export async function manageExpense(clienteId: number, prevState: any, formData: FormData) {
     const id = formData.get("id");
+    const valorRaw = formData.get("valor");
+    const valorParsed = parseCurrency(valorRaw);
+
     const validated = GastoSchema.safeParse({
         tipo: formData.get("tipo"),
-        valor: formData.get("valor"),
-        descricao: formData.get("descricao"),
+        valor: valorParsed,
+        descricao: formData.get("descricao") || undefined,
     });
 
-    if (!validated.success) return { error: "Dados inválidos" };
+    if (!validated.success) {
+        console.error("Erro validação:", validated.error);
+        return { error: "Dados inválidos: " + validated.error.issues.map(e => e.message).join(", ") };
+    }
 
     try {
         if (id) {

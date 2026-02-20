@@ -24,7 +24,7 @@ export default function DiagnosisStep({ cliente, onNext }: any) {
     });
 
     // @ts-ignore
-    const [state, dispatch] = useActionState(manageExpense.bind(null, cliente.id), { message: '', success: false });
+    const [state, dispatch] = useActionState(manageExpense.bind(null, cliente.id), { message: '', success: false, error: '' });
 
     useEffect(() => {
         if (state?.success) {
@@ -78,8 +78,9 @@ export default function DiagnosisStep({ cliente, onNext }: any) {
 
                             <div className="space-y-2">
                                 <Label>Tipo de Despesa</Label>
+                                <input type="hidden" name="tipo" value={formData.tipo} />
                                 <Select
-                                    name="tipo" required
+                                    name="tipo_select" required
                                     value={formData.tipo}
                                     onValueChange={v => setFormData({ ...formData, tipo: v })}
                                 >
@@ -104,6 +105,12 @@ export default function DiagnosisStep({ cliente, onNext }: any) {
                                     onChange={e => setFormData({ ...formData, valor: e.target.value })}
                                 />
                             </div>
+
+                            {state?.error && (
+                                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md border border-red-200">
+                                    {state.error}
+                                </div>
+                            )}
 
                             <div className="flex gap-2">
                                 <Button type="submit" className="w-full">
