@@ -61,9 +61,42 @@ export const generatePDF = async (cliente: any, simulacao: SimulacaoPlano, capac
     doc.text(`Mínimo Existencial (Preservado): ${formatCurrency(rendaRestante)}`, margin, headerBottomY + 33);
     doc.text(`Capacidade de Pagamento (Calculada): ${formatCurrency(capacidade)}`, margin, headerBottomY + 38);
 
+    // --- Expenses Table ---
+    doc.setFontSize(14);
+    doc.text("2. Despesas Consolidadas (Mínimo Existencial)", margin, headerBottomY + 50);
+
+    const expensesData = cliente.gastos.map((g: any) => [
+        g.tipo,
+        g.descricao || '-',
+        formatCurrency(Number(g.valor))
+    ]);
+
+    // Add total row
+    const totalDespesas = cliente.gastos.reduce((sum: number, g: any) => sum + Number(g.valor), 0);
+    expensesData.push(['TOTAL', '', formatCurrency(totalDespesas)]);
+
+    autoTable(doc, {
+        startY: headerBottomY + 55,
+        head: [['Tipo', 'Descrição', 'Valor']],
+        body: expensesData,
+        theme: 'striped',
+        headStyles: { fillColor: [71, 85, 105] }, // Slate-600
+        columnStyles: {
+            0: { cellWidth: 60 },
+            2: { cellWidth: 40, halign: 'right' }
+        },
+        didParseCell: (data) => {
+            if (data.row.index === expensesData.length - 1) {
+                data.cell.styles.fontStyle = 'bold';
+            }
+        }
+    });
+
+    let debtsY = (doc as any).lastAutoTable.finalY + 15;
+
     // --- Debts Table ---
     doc.setFontSize(14);
-    doc.text("2. Passivo Consolidado (Original)", margin, headerBottomY + 50);
+    doc.text("3. Passivo Consolidado (Original)", margin, debtsY);
 
     const tableData = cliente.dividas.map((d: any) => [
         d.credor,
@@ -74,7 +107,7 @@ export const generatePDF = async (cliente: any, simulacao: SimulacaoPlano, capac
     ]);
 
     autoTable(doc, {
-        startY: headerBottomY + 55,
+        startY: debtsY + 5,
         head: [['Credor', 'Nº Contrato', 'Tipo', 'Saldo Atual', 'Taxa Mensal']],
         body: tableData,
         theme: 'striped',
@@ -85,7 +118,7 @@ export const generatePDF = async (cliente: any, simulacao: SimulacaoPlano, capac
 
     // --- Simulation Results ---
     doc.setFontSize(14);
-    doc.text("3. Plano de Pagamento Judicial (Art. 104-B)", margin, finalY);
+    doc.text("4. Plano de Pagamento Judicial (Art. 104-B)", margin, finalY);
 
     doc.setFontSize(10);
     const boxY = finalY + 5;
@@ -121,7 +154,7 @@ export const generatePDF = async (cliente: any, simulacao: SimulacaoPlano, capac
     // --- Amortization Table ---
     doc.addPage();
     doc.setFontSize(14);
-    doc.text("4. Evolução do Plano de Pagamento (Tabela Price)", margin, 20);
+    doc.text("5. Evolução do Plano de Pagamento (Tabela Price)", margin, 20);
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Taxa Selic utilizada: ${SELIC_ANUAL_ATUAL}% a.a.`, margin, 26);
