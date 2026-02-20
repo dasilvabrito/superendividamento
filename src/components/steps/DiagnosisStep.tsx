@@ -20,6 +20,7 @@ export default function DiagnosisStep({ cliente, onNext }: any) {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [formData, setFormData] = useState({
         tipo: '',
+        customTipo: '',
         valor: ''
     });
 
@@ -34,13 +35,18 @@ export default function DiagnosisStep({ cliente, onNext }: any) {
 
     const resetForm = () => {
         setEditingId(null);
-        setFormData({ tipo: '', valor: '' });
+        setFormData({ tipo: '', customTipo: '', valor: '' });
     };
 
     const handleEdit = (g: any) => {
         setEditingId(g.id);
+
+        const knownTypes = ['MORADIA', 'ALIMENTACAO', 'SAUDE', 'ENERGIA', 'TRANSPORTE'];
+        const isKnown = knownTypes.includes(g.tipo);
+
         setFormData({
-            tipo: g.tipo,
+            tipo: isKnown ? g.tipo : 'OUTROS',
+            customTipo: isKnown ? '' : g.tipo,
             valor: Number(g.valor).toString()
         });
     };
@@ -78,11 +84,22 @@ export default function DiagnosisStep({ cliente, onNext }: any) {
 
                             <div className="space-y-2">
                                 <Label>Tipo de Despesa</Label>
-                                <input type="hidden" name="tipo" value={formData.tipo} />
+                                {/* If custom type, use customTipo as the value sent to server. Otherwise use the selected value. */}
+                                <input
+                                    type="hidden"
+                                    name="tipo"
+                                    value={formData.tipo === 'OUTROS' ? formData.customTipo : formData.tipo}
+                                />
                                 <Select
                                     name="tipo_select" required
                                     value={formData.tipo}
-                                    onValueChange={v => setFormData({ ...formData, tipo: v })}
+                                    onValueChange={v => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            tipo: v,
+                                            customTipo: v === 'OUTROS' ? '' : ''
+                                        }));
+                                    }}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecione..." />
@@ -93,9 +110,19 @@ export default function DiagnosisStep({ cliente, onNext }: any) {
                                         <SelectItem value="SAUDE">Saúde / Medicamentos</SelectItem>
                                         <SelectItem value="ENERGIA">Luz / Água / Gás</SelectItem>
                                         <SelectItem value="TRANSPORTE">Transporte</SelectItem>
-                                        <SelectItem value="OUTROS">Outros</SelectItem>
+                                        <SelectItem value="OUTROS">Outros (Digitar...)</SelectItem>
                                     </SelectContent>
                                 </Select>
+
+                                {formData.tipo === 'OUTROS' && (
+                                    <Input
+                                        placeholder="Digite o tipo de despesa..."
+                                        value={formData.customTipo}
+                                        onChange={e => setFormData({ ...formData, customTipo: e.target.value })}
+                                        className="mt-2"
+                                        required
+                                    />
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <Label>Valor (R$)</Label>
