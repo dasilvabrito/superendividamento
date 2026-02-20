@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import db from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ClientesPage() {
     const clients = await db.cliente.findMany({
         orderBy: { createdAt: 'desc' },
