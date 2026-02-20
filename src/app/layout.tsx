@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/LogoutButton";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const merriweather = Merriweather({
@@ -58,8 +59,13 @@ export default function RootLayout({
               </Link>
             </nav>
 
-            <div className="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-              v2.0.0 - Next.js Edition
+
+            <div className="p-4 border-t border-slate-800">
+              <LogoutButton />
+            </div>
+
+            <div className="p-4 pt-0 text-xs text-slate-500 text-center">
+              v2.0.1 - Next.js Edition
             </div>
           </aside>
 
