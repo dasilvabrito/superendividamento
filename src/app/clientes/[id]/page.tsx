@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const cliente = await db.cliente.findUnique({
