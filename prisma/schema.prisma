@@ -6,22 +6,51 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Tenant {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  clientes    Cliente[]
+  simulations Simulation[]
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  nome         String?
+  role         String   @default("USER") // ADMIN, USER
+  tenantId     Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
 }
 
 model Cliente {
-  id                Int              @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
+  tenantId          Int
   nome              String
-  cpf               String           @unique
+  cpf               String   @unique
   rendaLiquida      Decimal
-  numeroDependentes Int              @default(0)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  numeroDependentes Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  gastos            GastoEssencial[]
-  dividas           Divida[]
-  planos            PlanoPagamento[]
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  gastos          GastoEssencial[]
+  dividas         Divida[]
+  planos          PlanoPagamento[]
+  simulacoes      Simulation[]
 }
 
 model GastoEssencial {
@@ -58,9 +87,23 @@ model PlanoPagamento {
   capacidadeMensal       Decimal
   totalDividaConsolidada Decimal
   valorParcelaMensal     Decimal
-  descontoGlobal         Decimal? // Para restaurar simulação
-  carenciaDias           Int?     // Para restaurar simulação
+  descontoGlobal         Decimal?
+  carenciaDias           Int?
   dataCriacao            DateTime @default(now())
   
   cliente                Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+}
+
+model Simulation {
+  id         Int      @id @default(autoincrement())
+  tenantId   Int
+  clienteId  Int?
+  type       String   // JUDICIAL_UPDATE, BANK_REVISION, LABOR, etc.
+  inputData  Json     // Parâmetros de entrada
+  resultData Json     // Resultados calculados
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id])
+  cliente Cliente? @relation(fields: [clienteId], references: [id])
 }

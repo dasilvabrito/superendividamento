@@ -47,14 +47,83 @@ export default function RootLayout({
                   🏠 Dashboard
                 </Button>
               </Link>
+
+              <div className="pt-4 pb-2 px-2 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+                Módulos de Cálculo
+              </div>
+
+              <Link href="/clientes/novo">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  ⚖️ Superendividamento
+                </Button>
+              </Link>
+              <Link href="/calculadoras/judicial/atualizacao">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  🔨 Atualização Judicial
+                </Button>
+              </Link>
+              <Link href="/calculadoras/bancario/revisao">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  🏦 Revisão Bancária
+                </Button>
+              </Link>
+              <Link href="/calculadoras/trabalhista/rescisao">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  💼 Rescisão Trabalhista
+                </Button>
+              </Link>
+              <Link href="/calculadoras/familia/pensao">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  ❤️ Pensão Alimentícia
+                </Button>
+              </Link>
+              <Link href="/calculadoras/familia/inventario">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  ⚖️ Inventário Sucessório
+                </Button>
+              </Link>
+              <Link href="/calculadoras/tributario/icms-piscofins">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  ⚖️ ICMS (PIS/COFINS)
+                </Button>
+              </Link>
+              <Link href="/calculadoras/previdenciario/atraso">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  🛡️ INSS em Atraso
+                </Button>
+              </Link>
+              <Link href="/calculadoras/previdenciario/gps-mensal">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  📊 GPS INSS Mensal
+                </Button>
+              </Link>
+              <Link href="/calculadoras/previdenciario/gps-trimestral">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-xs py-1 h-auto">
+                  📊 GPS INSS Trimestral
+                </Button>
+              </Link>
+
+              <div className="pt-4 pb-2 px-2 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+                Gestão
+              </div>
               <Link href="/clientes">
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800">
                   👥 Clientes
                 </Button>
               </Link>
+              <Link href="/calculadoras">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800">
+                  🧮 Hub Completo
+                </Button>
+              </Link>
               <Link href="/relatorios">
                 <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-50">
                   📄 Relatórios
+                </Button>
+              </Link>
+              <Link href="/configuracoes/salarios">
+                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800">
+                  ⚙️ Configurações
                 </Button>
               </Link>
             </nav>
