@@ -29,8 +29,17 @@ export async function createClient(prevState: any, formData: FormData) {
     const { nome, cpf, rendaLiquida, numeroDependentes } = validatedFields.data;
 
     try {
+        // Buscar o tenant padrão (slug: escritorio-modelo) ou o primeiro disponível
+        let tenant = await db.tenant.findUnique({ where: { slug: 'escritorio-modelo' } });
+        if (!tenant) tenant = await db.tenant.findFirst();
+
+        if (!tenant) {
+            throw new Error("Nenhum Tenant encontrado. Execute o seed do banco de dados.");
+        }
+
         await db.cliente.create({
             data: {
+                tenantId: tenant.id,
                 nome,
                 cpf,
                 rendaLiquida,
