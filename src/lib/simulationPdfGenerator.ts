@@ -332,143 +332,137 @@ function renderSocialSecurityLateSection(doc: any, sim: any, x: number, y: numbe
 
     // ── CABEÇALHO DO MEMORIAL ──────────────────────────────────────────────
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("MEMORIAL DE CÁLCULO — INSS EM ATRASO", x, y);
+    doc.setFontSize(12);
+    doc.text("MEMORIAL DE CÁLCULO — INSS EM ATRASO (v4.0.1)", x, y);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
+    doc.setFontSize(8);
     doc.setTextColor(100);
-    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} | Art. 35 da Lei 8.212/91`, x, y + 4.5);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} | Art. 35 da Lei 8.212/91`, x, y + 5);
     doc.setTextColor(0);
 
-    y += 7;
-    doc.setDrawColor(180);
+    y += 10;
+    doc.setDrawColor(200);
     doc.line(x, y, 196, y);
-    y += 4;
+    y += 8;
 
-    // ── BLOCO 1: IDENTIFICAÇÃO + RISCO (2 colunas) ─────────────────────────
-    const codigoGps = res.modalidade === 'NORMAL'
-        ? (input.tipoSegurado === 'INDIVIDUAL' ? '1007' : '1406')
-        : (res.modalidade === 'SIMPLIFICADO'
-            ? (input.tipoSegurado === 'INDIVIDUAL' ? '1163' : '1473')
-            : '1929');
+    // ── 1. MANUTENÇÃO DA QUALIDADE DE SEGURADO ──────────────────────────
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("1. MANUTENÇÃO DA QUALIDADE DE SEGURADO (Art. 15 Lei 8.213/91)", x, y);
+    y += 6;
 
-    const colW = 88;
-    const colGap = 5;
-    const col2X = x + colW + colGap;
-
-    // Coluna esquerda — Identificação do segurado
-    autoTable(doc, {
-        startY: y,
-        margin: { left: x, right: 107 },
-        styles: { fontSize: 7, cellPadding: 1.2 },
-        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 38 }, 1: { cellWidth: 50 } },
-        body: [
-            ["Segurado", res.nomeSegurado || "—"],
-            ["NIT/PIS/PASEP", res.nit || "—"],
-            ["Competência", res.competencia ? res.competencia.split('-').reverse().join('/') : "—"],
-            ["Vencimento Orig.", res.originalDueDate || "—"],
-            ["Dt. Pagamento", res.paymentDate ? res.paymentDate.split('-').reverse().join('/') : "—"],
-        ],
-        theme: 'grid',
-    });
-
-    // Coluna direita — Análise de Risco
-    const nivelCor = res.risco.nivel === 'BAIXO' ? [39, 174, 96]
+    const nivelCor: [number, number, number] = res.risco.nivel === 'BAIXO' ? [39, 174, 96]
         : res.risco.nivel === 'MÉDIO' ? [230, 126, 34]
             : [192, 57, 43];
 
     autoTable(doc, {
         startY: y,
-        margin: { left: col2X, right: 14 },
-        styles: { fontSize: 7, cellPadding: 1.2 },
-        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 32 }, 1: { cellWidth: 56 } },
+        margin: { left: x },
+        styles: { fontSize: 8, cellPadding: 2 },
+        head: [['ANÁLISE DE RISCO', 'STATUS DA QUALIDADE']],
         body: [
-            ["Nível de Risco", { content: res.risco.nivel, styles: { textColor: nivelCor, fontStyle: 'bold' } }],
-            ["Cód. GPS", codigoGps],
-            ["Limite Qualidade", res.risco.infoGrace?.dataLimite || "N/D"],
-            ["Salário Mínimo", `R$ ${res.minWageUsed}`],
-            ["Alíquota", `${res.aliquotaUsed}%`],
+            [
+                { content: `NÍVEL: ${res.risco.nivel}\n\n${res.risco.observacao}`, styles: { textColor: nivelCor, fontStyle: 'bold' } },
+                { content: `QUALIDADE MANTIDA ATÉ: ${res.risco.infoGrace?.emBeneficio ? 'Automática' : res.risco.infoGrace?.dataLimite || "N/D"}\n\nSTATUS NO PAGAMENTO: ${res.risco.infoGrace?.emBeneficio ? 'Vigente' : (res.risco.infoGrace?.diasRestantes > 0 ? "Vigente" : "Expirada")}`, styles: { fontStyle: 'bold' } }
+            ]
         ],
         theme: 'grid',
+        columnStyles: { 0: { cellWidth: 91 }, 1: { cellWidth: 91 } }
     });
 
-    y = doc.lastAutoTable.finalY + 3;
+    y = (doc as any).lastAutoTable.finalY + 5;
 
-    // Parecer técnico compacto
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(6.5);
-    doc.setTextColor(80);
-    const parecer = `Parecer: ${res.risco.observacao}`;
-    const linhasParecer = doc.splitTextToSize(parecer, 182);
-    doc.text(linhasParecer, x, y);
+    // Alerta Regra Restritiva/Legal
+    if (res.tipoSegurado === 'FACULTATIVO') {
+        doc.setFillColor(255, 252, 232); // Amber-50
+        doc.rect(x, y, 182, 18, 'F');
+        doc.setDrawColor(252, 211, 77); // Amber-200
+        doc.rect(x, y, 182, 18);
+        doc.setFontSize(7);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(180, 83, 9); // Amber-700
+        doc.text("ALERTA: REGRA MAIS RESTRITIVA — SEGURADO FACULTATIVO", x + 3, y + 5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(146, 64, 14); // Amber-800
+        const alertMsg = [
+            "  Prazo fixo de 6 meses após a última contribuição (Art. 15, II, 'b').",
+            "  Não tem direito à extensão de 24 ou 36 meses.",
+            "  Perda definitiva da qualidade caso o recolhimento não ocorra no prazo legal."
+        ];
+        doc.text(alertMsg, x + 3, y + 8.5);
+        y += 23;
+    } else {
+        y += 2;
+    }
+
     doc.setTextColor(0);
-    y += (linhasParecer.length * 3) + 2;
 
-    // ── BLOCO 2: ENCARGOS ──────────────────────────────────────────────────
+    // ── 2. MEMORIAL DE ENCARGOS ──────────────────────────────────────────
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("2. MEMORIAL DE ENCARGOS (Art. 35 Lei 8.212/91)", x, y);
+    y += 6;
+
     autoTable(doc, {
         startY: y,
         margin: { left: x },
-        head: [["RUBRICA", "BASE / ALÍQUOTA", "VALOR"]],
+        head: [['RUBRICA', 'BASE / ALÍQUOTA', 'VALOR']],
         body: [
-            ["Contribuição Principal", `R$ ${res.minWageUsed} × ${res.aliquotaUsed}%`, `R$ ${res.principal}`],
-            ["Multa de Mora (0,33%/dia)", "Máx. 20%", `R$ ${res.fine}`],
-            [`Juros de Mora (SELIC ${(res.selicAcumulada * 100).toFixed(2)}%)`, "Acumulado + 1%", `R$ ${res.interest}`],
+            [
+                { content: "Contribuição Principal", styles: { fontStyle: 'bold' } },
+                `R$ ${res.minWageUsed} x ${res.aliquotaUsed}%`,
+                { content: `R$ ${res.principal}`, styles: { halign: 'right', fontStyle: 'bold' } }
+            ],
+            [
+                { content: "Multa de Mora\n(0,33% ao dia / Cap 20%)", styles: { fontSize: 7 } },
+                `R$ ${res.principal} x 20.00%`,
+                { content: `R$ ${res.fine}`, styles: { halign: 'right', fontStyle: 'bold', textColor: [230, 126, 34] } }
+            ],
+            [
+                { content: "Juros de Mora (SELIC)\n(Acumulado + 1%)", styles: { fontSize: 7 } },
+                `R$ ${res.principal} x ${(res.selicAcumulada * 100).toFixed(4)}%`,
+                { content: `R$ ${res.interest}`, styles: { halign: 'right', fontStyle: 'bold', textColor: [192, 57, 43] } }
+            ],
         ],
-        foot: [["TOTAL DEVIDO (campo 11 da GPS)", "", `R$ ${res.total}`]],
+        foot: [[
+            { content: "TOTAL DA GPS (CAMPO 11)", styles: { halign: 'left', fontStyle: 'bold' } },
+            "",
+            { content: `R$ ${res.total}`, styles: { halign: 'right', fontStyle: 'bold', fontSize: 11 } }
+        ]],
         theme: 'striped',
-        styles: { fontSize: 7.5, cellPadding: 1.5 },
-        headStyles: { fillColor: [30, 30, 30], fontSize: 6.5, textColor: [255, 255, 255] },
-        footStyles: { fillColor: [20, 20, 20], fontSize: 8.5, textColor: [255, 255, 255], fontStyle: 'bold' },
-        columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 60 }, 2: { halign: 'right' } },
+        styles: { fontSize: 8.5, cellPadding: 3 },
+        headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255] },
+        footStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] },
+        columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 60 }, 2: { cellWidth: 32 } }
     });
 
-    y = doc.lastAutoTable.finalY + 2;
+    y = (doc as any).lastAutoTable.finalY + 10;
 
-    // Nota legal
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(5.5);
-    doc.setTextColor(120);
-    doc.text("* Juros calculados pela SELIC acumulada a partir do mês seguinte ao vencimento + 1% no mês do pagamento (Lei 9.430/96 e Res. INSS).", x, y);
-    doc.setTextColor(0);
-    y += 5;
+    // ── 3. RESUMO TÉCNICO ────────────────────────────────────────────────
+    autoTable(doc, {
+        startY: y,
+        margin: { left: x },
+        styles: { fontSize: 7.5, cellPadding: 2 },
+        body: [
+            [
+                { content: `CÓDIGO GPS\n${res.aliquotaUsed === '20' ? (res.tipoSegurado === 'INDIVIDUAL' ? '1007' : '1406') : (res.aliquotaUsed === '11' ? (res.tipoSegurado === 'INDIVIDUAL' ? '1163' : '1473') : '1929')}`, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: `VENCIMENTO ORIGINAL\n${res.originalDueDate}`, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: `SALÁRIO MÍNIMO\nR$ ${res.minWageUsed}`, styles: { halign: 'center', fontStyle: 'bold' } },
+                { content: `SELIC ACUMULADA\n${(res.selicAcumulada * 100).toFixed(2)}%`, styles: { halign: 'center', fontStyle: 'bold', textColor: [37, 99, 235] } }
+            ]
+        ],
+        theme: 'grid',
+        columnStyles: { 0: { cellWidth: 45.5 }, 1: { cellWidth: 45.5 }, 2: { cellWidth: 45.5 }, 3: { cellWidth: 45.5 } }
+    });
 
-    // ── LINHA SEPARADORA ──────────────────────────────────────────────────
-    doc.setDrawColor(100);
+    y = (doc as any).lastAutoTable.finalY + 15;
+
+    // Linha final/assinatura
+    doc.setDrawColor(220);
     doc.line(x, y, 196, y);
-    y += 3;
-
-    // ── GPS — DUAS VIAS ────────────────────────────────────────────────────
-    const gpsInput = {
-        nome: res.nomeSegurado || "NÃO INFORMADO",
-        nit: res.nit || "NÃO INFORMADO"
-    };
-
-    const gpsRes = {
-        codigo: codigoGps,
-        competencia: (res.competencia || "").split('-').reverse().join('/'),
-        vencimento: (res.paymentDate || "").split('-').reverse().join('/'),
-        valorPrincipal: res.principal,
-        multa: (parseFloat(res.fine || "0") + parseFloat(res.interest || "0")).toFixed(2),
-        juros: "0,00",
-        total: res.total
-    };
-
-    renderCompactGpsGuide(doc, gpsInput, gpsRes, x, y, "1ª VIA — CONTRIBUINTE");
-
-    y += 77;
-
-    // Linha de recorte
-    doc.setDrawColor(180);
-    doc.setLineDashPattern([2, 2], 0);
-    doc.line(x, y - 2, 196, y - 2);
-    doc.setFontSize(5);
-    doc.setTextColor(160);
-    doc.text("✂  recortar aqui", 105, y - 3.5, { align: "center" });
-    doc.setLineDashPattern([], 0);
-    doc.setTextColor(0);
-
-    y += 1;
-    renderCompactGpsGuide(doc, gpsInput, gpsRes, x, y, "2ª VIA — ENTE RECEBEDOR");
+    doc.setFontSize(6);
+    doc.setTextColor(150);
+    doc.text("Nota: Este documento é apenas uma simulação baseada nas regras vigentes do Art. 35 da Lei 8.212/91.", x, y + 4);
 }
 
 function renderCompactGpsGuide(doc: any, input: any, res: any, x: number, y: number, viaLabel: string) {

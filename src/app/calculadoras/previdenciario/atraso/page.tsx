@@ -94,7 +94,7 @@ export default function SocialSecurityLatePaymentPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Contribuições em Atraso</h1>
                     <p className="text-muted-foreground flex items-center gap-2">
                         Cálculo automatizado por Salário Mínimo e Matriz de Risco.
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">Legal Intel v3</Badge>
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">Legal Intel v4.0.1 - Blue Edition</Badge>
                     </p>
                 </div>
                 <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">Módulo Previdenciário</Badge>
