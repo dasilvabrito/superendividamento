@@ -4,6 +4,7 @@
  */
 
 import { MinimumWageService } from './MinimumWageService';
+import { CalculationEngine } from '../../core/calculation-engine/CalculationEngine';
 
 export function obterSalarioMinimo(anoOuData: string | number | Date): number {
     return MinimumWageService.obterSalarioMinimo(anoOuData as any);
@@ -155,32 +156,40 @@ export function calcularGPS(data: GPSInput) {
     const multiplicador = isTrimestral ? 3 : 1;
     const valorPrincipal = Math.round(valorMensal * multiplicador * 100) / 100;
 
-    // 3. Multa (0.33% ao dia, max 20%)
-    let multa = 0;
-    if (diasAtraso > 0) {
-        multa = valorPrincipal * (diasAtraso * 0.0033);
-        const limiteMulta = valorPrincipal * 0.20;
-        if (multa > limiteMulta) multa = limiteMulta;
-    }
-    multa = Math.round(multa * 100) / 100;
-
-    // 4. Juros (Simular 1% ao mês de atraso)
-    let juros = 0;
-    if (diasAtraso > 30) {
-        const mesesAtraso = Math.floor(diasAtraso / 30);
-        juros = valorPrincipal * (0.01 * mesesAtraso);
-    }
-    juros = Math.round(juros * 100) / 100;
-
-    const total = Math.round((valorPrincipal + multa + juros) * 100) / 100;
-
+    // 3. Encargos de Atraso (Multa e Juros) usando o Engine Centralizado
     const competencia = isTrimestral
         ? obterCompetencia(trimestre!, ano)
         : `${String(mes).padStart(2, '0')}/${ano}`;
 
-    const vencimento = isTrimestral
+    const vencimentoStr = isTrimestral
         ? obterVencimento(trimestre!, ano)
         : obterVencimentoMensal(competencia);
+
+    // Converter vencimento "DD/MM/AAAA" para Date
+    const [diaV, mesV, anoV] = vencimentoStr.split('/').map(Number);
+    const dataVencimento = new Date(anoV, mesV - 1, diaV);
+
+    // Calcular data de pagamento aproximada baseada nos dias de atraso
+    const dataPagamento = new Date(dataVencimento);
+    dataPagamento.setDate(dataPagamento.getDate() + diasAtraso);
+
+    // Formatar competência para o engine (YYYY-MM)
+    const [mesC, anoC] = competencia.split('/');
+    const competenciaISO = `${anoC}-${mesC.padStart(2, '0')}`;
+
+    const lateResult = CalculationEngine.calculateSocialSecurityLatePayment({
+        principal: valorPrincipal,
+        dueDate: dataVencimento,
+        paymentDate: dataPagamento,
+        competencia: competenciaISO
+    });
+
+    const multa = Math.round(lateResult.fine.toNumber() * 100) / 100;
+    const juros = Math.round(lateResult.interest.toNumber() * 100) / 100;
+
+    const total = Math.round((valorPrincipal + multa + juros) * 100) / 100;
+
+    const vencimento = vencimentoStr;
 
     return {
         codigo: obterCodigoGPS(tipo, modalidade, isTrimestral),

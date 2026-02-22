@@ -486,9 +486,11 @@ export class CalculationEngine {
         const fine = P.mul(fineRate);
 
         // 2. Juros SELIC
-        // Mês seguinte ao vencimento
-        const dataVenc = new Date(data.competencia + "-15");
-        const dataInicioJuros = new Date(dataVenc.getFullYear(), dataVenc.getMonth() + 1, 1);
+        // Regra Art. 35, II Lei 8.212/91:
+        // Acumulado do primeiro dia do mês subsequente ao vencimento até o mês anterior ao do pagamento + 1% no mês do pagamento.
+
+        // Mês seguinte ao vencimento - Usamos a data de vencimento real passada no input
+        const dataInicioJuros = new Date(start.getFullYear(), start.getMonth() + 1, 1);
 
         // Mês anterior ao pagamento
         const dataFimJuros = new Date(end.getFullYear(), end.getMonth() - 1, 1);
@@ -498,8 +500,12 @@ export class CalculationEngine {
             selicAcumulada = SelicService.acumularSelic(dataInicioJuros, dataFimJuros);
         }
 
-        // + 1% no mês do pagamento
-        const interestRateTotal = new Decimal(selicAcumulada).add(0.01);
+        // + 1% no mês do pagamento (se o pagamento for após o vencimento)
+        let interestRateTotal = new Decimal(0);
+        if (end > start) {
+            interestRateTotal = new Decimal(selicAcumulada).add(0.01);
+        }
+
         const interest = P.mul(interestRateTotal);
 
         return {
