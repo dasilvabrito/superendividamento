@@ -264,18 +264,17 @@ export default function SocialSecurityLatePaymentPage() {
                         <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
                             {/* ── ANÁLISE DE RISCO DETALHADA ─────────────────── */}
                             <Card className={`border-l-8 ${result.risco.nivel === 'BAIXO' ? 'border-l-emerald-500' : result.risco.nivel === 'MÉDIO' ? 'border-l-amber-500' : 'border-l-red-500'}`}>
-                                <CardHeader className={`border-b pb-4 ${result.risco.nivel === 'BAIXO' ? 'bg-emerald-50/40' : result.risco.nivel === 'MÉDIO' ? 'bg-amber-50/40' : 'bg-red-50/40'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2.5 rounded-full ${result.risco.nivel === 'BAIXO' ? 'bg-emerald-100 text-emerald-600' : result.risco.nivel === 'MÉDIO' ? 'bg-amber-100 text-amber-600' : 'bg-red-100 text-red-600'}`}>
-                                            {result.risco.nivel === 'BAIXO' ? <CheckCircle2 className="w-6 h-6" /> : result.risco.nivel === 'MÉDIO' ? <AlertTriangle className="w-6 h-6" /> : <ShieldAlert className="w-6 h-6" />}
+                                <CardHeader className={`border-b-2 pb-5 ${result.risco.nivel === 'BAIXO' ? 'bg-emerald-50 border-emerald-100' : result.risco.nivel === 'MÉDIO' ? 'bg-amber-50 border-amber-100' : 'bg-red-50 border-red-100'}`}>
+                                    <div className="flex items-center gap-4">
+                                        <div className={`p-3 rounded-xl border-2 ${result.risco.nivel === 'BAIXO' ? 'bg-white border-emerald-200 text-emerald-600' : result.risco.nivel === 'MÉDIO' ? 'bg-white border-amber-200 text-amber-600' : 'bg-white border-red-200 text-red-600'}`}>
+                                            {result.risco.nivel === 'BAIXO' ? <ShieldCheck className="w-7 h-7" /> : result.risco.nivel === 'MÉDIO' ? <AlertTriangle className="w-7 h-7" /> : <ShieldAlert className="w-7 h-7" />}
                                         </div>
                                         <div>
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <CardTitle className="text-base uppercase tracking-tight">Análise de Risco Previdenciário</CardTitle>
-                                                <Badge className={`${result.risco.cor} bg-white border-current text-xs font-bold`}>{result.risco.nivel}</Badge>
-                                                <Badge variant="outline" className="text-xs">{result.risco.badge}</Badge>
+                                            <div className="flex items-center gap-3 flex-wrap">
+                                                <CardTitle className="text-xl font-black uppercase tracking-tight">MANUTENÇÃO DA QUALIDADE DE SEGURADO</CardTitle>
+                                                <Badge className={`px-3 py-1 ${result.risco.nivel === 'BAIXO' ? 'bg-emerald-600 hover:bg-emerald-700' : result.risco.nivel === 'MÉDIO' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-red-600 hover:bg-red-700'} text-white font-bold text-sm`}>{result.risco.nivel}</Badge>
                                             </div>
-                                            <p className="text-sm text-slate-600 mt-1">{result.risco.observacao}</p>
+                                            <p className="text-sm font-medium text-slate-700 mt-1">{result.risco.observacao}</p>
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -520,13 +519,16 @@ export default function SocialSecurityLatePaymentPage() {
                                     </Table>
                                 </CardContent>
                                 <CardFooter className="p-4 border-t flex justify-between gap-4">
-                                    <Button className="flex-1 bg-green-700 hover:bg-green-800 gap-2 h-11" onClick={handleExportPDF}>
-                                        <FileDown className="w-4 h-4" />
-                                        Exportar Memorial (PDF)
+                                    <Button
+                                        className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2 h-11 shadow-lg shadow-blue-200"
+                                        onClick={() => window.open('https://sal.rfb.gov.br/home', '_blank')}
+                                    >
+                                        <TrendingUp className="w-4 h-4" />
+                                        Gerar Guia no SAL (Oficial)
                                     </Button>
-                                    <Button variant="outline" className="flex-1 gap-2 h-11 border-2" onClick={handleExportPDF}>
-                                        <Printer className="w-4 h-4" />
-                                        Imprimir Guia
+                                    <Button variant="outline" className="flex-1 border-2 gap-2 h-11" onClick={handleExportPDF}>
+                                        <FileDown className="w-4 h-4" />
+                                        Memorial de Cálculo (PDF)
                                     </Button>
                                 </CardFooter>
                             </Card>

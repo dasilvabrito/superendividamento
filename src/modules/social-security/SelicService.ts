@@ -12,7 +12,9 @@ export class SelicService {
         "2024-05": 0.0083, "2024-06": 0.0079, "2024-07": 0.0091, "2024-08": 0.0087,
         "2024-09": 0.0084, "2024-10": 0.0093, "2024-11": 0.0081, "2024-12": 0.0087,
         "2025-01": 0.0100, "2025-02": 0.0095, "2025-03": 0.0110, "2025-04": 0.0105,
-        "2025-05": 0.0098, "2025-06": 0.0102, "2025-07": 0.0708, "2025-08": 0.0101
+        "2025-05": 0.0098, "2025-06": 0.0102, "2025-07": 0.0107, "2025-08": 0.0101,
+        "2025-09": 0.0095, "2025-10": 0.0100, "2025-11": 0.0110, "2025-12": 0.0105,
+        "2026-01": 0.0090, "2026-02": 0.0100
     };
 
     /**
@@ -21,7 +23,7 @@ export class SelicService {
      * @param dataFim Data final da acumulação
      */
     static acumularSelic(dataInicio: Date, dataFim: Date): number {
-        let fatorAcumulado = 1.0;
+        let acumulado = 0;
         const inicio = new Date(dataInicio);
         const fim = new Date(dataFim);
 
@@ -35,11 +37,11 @@ export class SelicService {
                 ? this.tabelaSelic[anoMes]
                 : 0.01; // Fallback para taxa média se não houver dados (1% am)
 
-            fatorAcumulado *= (1 + taxaMensal);
+            acumulado += taxaMensal;
             inicio.setMonth(inicio.getMonth() + 1);
         }
 
-        return fatorAcumulado - 1;
+        return acumulado;
     }
 
     /**
