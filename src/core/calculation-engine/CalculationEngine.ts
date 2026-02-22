@@ -483,7 +483,9 @@ export class CalculationEngine {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         let fineRate = new Decimal(diffDays).mul(0.0033);
         if (fineRate.gt(0.20)) fineRate = new Decimal(0.20);
-        const fine = P.mul(fineRate);
+
+        // Multa: Truncar para 2 casas decimais (ex: 33,396 -> 33,39)
+        const fine = P.mul(fineRate).toDecimalPlaces(2, Decimal.ROUND_DOWN);
 
         // 2. Juros SELIC
         // Regra Art. 35, II Lei 8.212/91:
@@ -506,7 +508,8 @@ export class CalculationEngine {
             interestRateTotal = new Decimal(selicAcumulada).add(0.01);
         }
 
-        const interest = P.mul(interestRateTotal);
+        // Juros: Arredondamento para cima (CEIL) para 2 casas decimais conforme exemplo do usuário
+        const interest = P.mul(interestRateTotal).toDecimalPlaces(2, Decimal.ROUND_CEIL);
 
         return {
             principal: P,

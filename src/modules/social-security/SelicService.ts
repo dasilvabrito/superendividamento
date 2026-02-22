@@ -21,7 +21,7 @@ export class SelicService {
      * @param dataFim Data final da acumulação
      */
     static acumularSelic(dataInicio: Date, dataFim: Date): number {
-        let acumulado = 0;
+        let fatorAcumulado = 1.0;
         const inicio = new Date(dataInicio);
         const fim = new Date(dataFim);
 
@@ -31,16 +31,15 @@ export class SelicService {
 
         while (inicio <= fim) {
             const anoMes = `${inicio.getFullYear()}-${String(inicio.getMonth() + 1).padStart(2, '0')}`;
-            if (this.tabelaSelic[anoMes]) {
-                acumulado += this.tabelaSelic[anoMes];
-            } else {
-                // Fallback para taxa média se não houver dados (1% am)
-                acumulado += 0.01;
-            }
+            const taxaMensal = this.tabelaSelic[anoMes] !== undefined
+                ? this.tabelaSelic[anoMes]
+                : 0.01; // Fallback para taxa média se não houver dados (1% am)
+
+            fatorAcumulado *= (1 + taxaMensal);
             inicio.setMonth(inicio.getMonth() + 1);
         }
 
-        return acumulado;
+        return fatorAcumulado - 1;
     }
 
     /**
