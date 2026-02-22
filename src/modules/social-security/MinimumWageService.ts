@@ -80,12 +80,12 @@ export class MinimumWageService {
     }
 
     /**
-     * Calcula o vencimento (dia 15) com regra de antecipação.
+     * Calcula o vencimento (dia 10) com regra de antecipação.
+     * Regra ajustada conforme solicitação do usuário: Dia 10 do próprio mês.
      */
     static calcularVencimentoAntecipado(competencia: string): Date {
-        const date = new Date(competencia + "-15");
-        // Vencimento é no mês seguinte
-        date.setMonth(date.getMonth() + 1);
+        // Assume competência no formato "YYYY-MM"
+        const date = new Date(competencia + "-10T12:00:00");
 
         // Antecipar se for final de semana ou feriado
         while (date.getDay() === 0 || date.getDay() === 6 || this.isFeriadoNacional(date)) {

@@ -248,7 +248,7 @@ export default function GpsMensalPage() {
                                         </div>
                                     </div>
                                     <div className="pt-6">
-                                        <p className="text-[10px] text-slate-500 italic">Vencimento em Dia 15</p>
+                                        <p className="text-[10px] text-slate-500 italic">Vencimento em Dia 10</p>
                                     </div>
                                 </div>
                             </div>

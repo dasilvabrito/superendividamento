@@ -18,7 +18,7 @@ export async function calculateLatePaymentAction(formData: FormData) {
     const nit = formData.get('nit') as string || "";
     const nomeSegurado = formData.get('nomeSegurado') as string || "SEGURADO NÃO IDENTIFICADO";
 
-    // 1. Calcular Vencimento Original (Dia 15 Antecipado)
+    // 1. Calcular Vencimento Original (Dia 10 Antecipado)
     const originalDueDate = MinimumWageService.calcularVencimentoAntecipado(competenciaInput);
     const dueDateStr = originalDueDate.toISOString().split('T')[0];
 
